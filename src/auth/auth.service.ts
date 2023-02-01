@@ -50,7 +50,11 @@ export class AuthService {
 
             if (!pwMatches) throw new ForbiddenException('Credentials incorrect',);
 
-            return this.signToken(user.id, user.email);
+            const token = await this.signToken(user.id, user.email);
+
+            return {
+                access_token: token,
+            };
         } catch (error) {
             if (error instanceof PrismaClientKnownRequestError) {
                 if (error.code === 'P2002')
@@ -67,7 +71,7 @@ export class AuthService {
             email,
         };
 
-        const secret = this.config.get('JWT_SCRET');
+        const secret = this.config.get('JWT_SECRET');        
 
         return this.jwt.signAsync(payload, {
             expiresIn: '15m',
